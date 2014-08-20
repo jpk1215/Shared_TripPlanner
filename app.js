@@ -1,4 +1,7 @@
 var express = require('express');
+var swig = require('swig');
+var sass = require('node-sass');
+
 var path = require('path');
 var favicon = require('static-favicon');
 var logger = require('morgan');
@@ -9,22 +12,33 @@ var routes = require('./routes/index');
 var users = require('./routes/users');
 
 var app = express();
+app.use('/bower_components', express.static(__dirname + '/bower_components'));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+app.set('view engine', 'html');
+app.engine('html', swig.renderFile);
 
 app.use(favicon());
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(cookieParser());
+
+app.use(
+  sass.middleware({
+    src: __dirname + '/assets', //where the sass files are
+    dest: __dirname + '/public', //where css should go
+    // includePaths: __dirname + '/assets/stylesheets',
+    debug: true // obvious
+  })
+);
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
 app.use('/users', users);
 
-/// catch 404 and forward to error handler
+/// catch 404 and forwarding to error handler
 app.use(function(req, res, next) {
     var err = new Error('Not Found');
     err.status = 404;
@@ -36,6 +50,7 @@ app.use(function(req, res, next) {
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
+    swig.setDefaults({ cache: false });
     app.use(function(err, req, res, next) {
         res.status(err.status || 500);
         res.render('error', {
