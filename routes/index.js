@@ -1,9 +1,10 @@
 var express = require('express');
 var router = express.Router();
 var models = require('../models');
+
 router.get('/', function(req, res) {
   models.Hotel.find(function(err, results) {
-    res.render('index', { hotels: results, title: "Trip Planner" });
+    res.render('index', { hotels: models["Hotel"], title: "Trip Planner" });
   });
 });
 
